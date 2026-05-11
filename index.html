@@ -63,10 +63,10 @@
     gap: 12px;
   }
   .brand img {
-    width: 28px;
-    height: 28px;
+    width: 36px;
+    height: 36px;
     object-fit: contain;
-    opacity: 0.85;
+    opacity: 1;
   }
   .brand-text {
     font-family: 'Fraunces', serif;
@@ -286,10 +286,11 @@
     max-width: 720px;
   }
   .hero-mark {
-    width: 64px;
-    height: 64px;
-    margin: 0 auto 32px;
-    opacity: 0.9;
+    width: 110px;
+    height: 110px;
+    margin: 0 auto 36px;
+    opacity: 1;
+    display: block;
   }
   .hero-mark img { width: 100%; height: 100%; object-fit: contain; }
   .hero-eyebrow {
@@ -458,7 +459,7 @@
           <div class="hero-mark"><img src="logo.png" alt="Adherence" /></div>
           <div class="hero-eyebrow">Soho House Bangkok &nbsp;×&nbsp; Adherence</div>
           <h1 class="hero-title">A community <em>5K</em><br/>through Bangkok.</h1>
-          <p class="hero-sub">Movement, community and good energy. Led by Clinton Suh — Soho House New York member and founder of Adherence Studio. Pre-workout+ and Advanced Electrolytes+ provided, with a poolside social to follow.</p>
+          <p class="hero-sub">Movement, community and good energy. Led by Clinton Suh, Soho House New York member and founder of Adherence Studio. Pre-workout+ and Advanced Electrolytes+ provided to fuel your workout, poolside social to follow.</p>
 
           <div class="meta-row">
             <div class="meta">
@@ -525,9 +526,10 @@
             <input type="text" class="input" id="social" placeholder="@yourhandle" />
           </div>
           <div class="actions">
-            <button class="btn" data-submit>Complete RSVP <span class="arrow">→</span></button>
+            <button class="btn" data-submit id="submit-btn">Complete RSVP <span class="arrow">→</span></button>
             <button class="skip" data-submit>Skip & finish</button>
           </div>
+          <div class="error" id="submit-error" style="margin-top:18px;">Something went wrong. Please try again.</div>
         </div>
       </section>
 
@@ -555,9 +557,16 @@
   </footer>
 
 <script>
+  // ============================================================
+  // PASTE YOUR GOOGLE APPS SCRIPT WEB APP URL HERE
+  // Looks like: https://script.google.com/macros/s/AKfycb.../exec
+  const ENDPOINT = '__PASTE_YOUR_APPS_SCRIPT_URL__';
+  // ============================================================
+
   const slides = Array.from(document.querySelectorAll('.slide'));
   const totalSteps = 4; // cover excluded from progress numbering
   let current = 0;
+  let submitting = false;
   const data = { name: '', email: '', social: '' };
 
   const stepNum = document.getElementById('step-num');
@@ -640,13 +649,54 @@
   });
   document.querySelectorAll('[data-submit]').forEach(btn => {
     btn.addEventListener('click', () => {
-      if (validate(slides[current])) {
-        // hook for real backend / Typeform redirect goes here
-        // console.log('submission', data);
-        go(current + 1);
-      }
+      if (submitting) return;
+      if (!validate(slides[current])) return;
+      submit();
     });
   });
+
+  async function submit() {
+    const submitBtn = document.getElementById('submit-btn');
+    const errBox = document.getElementById('submit-error');
+    errBox.classList.remove('show');
+
+    // If endpoint isn't configured yet, just advance (preview mode)
+    if (!ENDPOINT || ENDPOINT.startsWith('__PASTE')) {
+      console.warn('No ENDPOINT configured — skipping POST');
+      go(current + 1);
+      return;
+    }
+
+    submitting = true;
+    const originalLabel = submitBtn.innerHTML;
+    submitBtn.innerHTML = 'Submitting…';
+    submitBtn.style.opacity = '0.7';
+
+    try {
+      // text/plain avoids CORS preflight on Apps Script Web Apps
+      const res = await fetch(ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({
+          name: data.name,
+          email: data.email,
+          social: data.social,
+          event: 'Soho House Bangkok x Adherence 5K',
+          userAgent: navigator.userAgent
+        })
+      });
+      const json = await res.json().catch(() => ({ ok: res.ok }));
+      if (!json.ok) throw new Error(json.error || 'Submission failed');
+      go(current + 1);
+    } catch (e) {
+      console.error(e);
+      errBox.classList.add('show');
+    } finally {
+      submitting = false;
+      submitBtn.innerHTML = originalLabel;
+      submitBtn.style.opacity = '1';
+    }
+  }
 
   // Footer nav
   prevBtn.addEventListener('click', () => go(current - 1));
