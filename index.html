@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Soho House Bangkok x Adherence — 5K Run Club</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f4f1ec;
+    --bg-2: #ebe6dd;
+    --ink: #1a1a1a;
+    --ink-soft: #4a4a4a;
+    --muted: #8a857d;
+    --line: rgba(26,26,26,0.12);
+    --accent: #1a1a1a;
+    --error: #b34a3a;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+    overflow: hidden;
+    position: relative;
+  }
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(1000px 600px at 20% 10%, rgba(255,255,255,0.6), transparent 60%),
+      radial-gradient(800px 600px at 90% 90%, rgba(26,26,26,0.04), transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .stage {
+    position: relative;
+    z-index: 1;
+    height: 100vh;
+    width: 100%;
+    overflow: hidden;
+  }
+
+  /* Header */
+  .topbar {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    padding: 28px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    z-index: 10;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .brand img {
+    width: 28px;
+    height: 28px;
+    object-fit: contain;
+    opacity: 0.85;
+  }
+  .brand-text {
+    font-family: 'Fraunces', serif;
+    font-weight: 400;
+    font-size: 15px;
+    letter-spacing: 0.5px;
+    color: var(--ink);
+  }
+  .progress {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    letter-spacing: 1.5px;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+  .progress-bar {
+    width: 120px;
+    height: 2px;
+    background: var(--line);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--ink);
+    width: 25%;
+    transition: width 0.6s cubic-bezier(0.65, 0, 0.35, 1);
+  }
+
+  /* Slides */
+  .slides {
+    height: 100%;
+    width: 100%;
+    position: relative;
+  }
+  .slide {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 40px;
+    opacity: 0;
+    transform: translateY(24px);
+    pointer-events: none;
+    transition: opacity 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+                transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .slide.active {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+  .slide.leaving {
+    opacity: 0;
+    transform: translateY(-24px);
+  }
+
+  .panel {
+    width: 100%;
+    max-width: 640px;
+  }
+
+  .eyebrow {
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .eyebrow .num {
+    color: var(--ink);
+    font-weight: 500;
+  }
+  .eyebrow .arrow {
+    font-size: 14px;
+    color: var(--ink);
+  }
+
+  h1.headline {
+    font-family: 'Fraunces', serif;
+    font-weight: 400;
+    font-size: clamp(36px, 5vw, 56px);
+    line-height: 1.08;
+    letter-spacing: -0.5px;
+    color: var(--ink);
+    margin-bottom: 12px;
+  }
+  h1.headline em {
+    font-style: italic;
+    font-weight: 300;
+  }
+  .sub {
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--ink-soft);
+    margin-bottom: 36px;
+    max-width: 480px;
+  }
+  .sub .opt {
+    color: var(--muted);
+    font-style: italic;
+  }
+
+  /* Inputs */
+  .field {
+    position: relative;
+    margin-bottom: 20px;
+  }
+  .input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--line);
+    padding: 14px 0;
+    font-family: 'Fraunces', serif;
+    font-weight: 300;
+    font-size: 32px;
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.3s ease;
+  }
+  .input::placeholder {
+    color: var(--muted);
+    font-style: italic;
+    font-weight: 300;
+  }
+  .input:focus {
+    border-bottom-color: var(--ink);
+  }
+  .hint {
+    margin-top: 12px;
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 0.3px;
+  }
+  .hint kbd {
+    font-family: 'Inter', sans-serif;
+    background: rgba(26,26,26,0.06);
+    border: 1px solid var(--line);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 11px;
+    margin: 0 2px;
+  }
+
+  .error {
+    margin-top: 8px;
+    font-size: 13px;
+    color: var(--error);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+  .error.show { opacity: 1; }
+
+  /* Buttons */
+  .actions {
+    margin-top: 28px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .btn {
+    background: var(--ink);
+    color: var(--bg);
+    border: 1px solid var(--ink);
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+    font-size: 14px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 16px 28px;
+    cursor: pointer;
+    transition: transform 0.2s ease, background 0.2s ease, color 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .btn:hover {
+    transform: translateY(-1px);
+    background: #2c2c2c;
+  }
+  .btn.ghost {
+    background: transparent;
+    color: var(--ink);
+  }
+  .btn.ghost:hover {
+    background: rgba(26,26,26,0.05);
+  }
+  .btn .arrow {
+    transition: transform 0.2s ease;
+  }
+  .btn:hover .arrow { transform: translateX(3px); }
+  .skip {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--muted);
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    letter-spacing: 0.5px;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+  .skip:hover { color: var(--ink); }
+
+  /* Hero / cover slide */
+  #slide-0 .panel {
+    text-align: center;
+    max-width: 720px;
+  }
+  .hero-mark {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 32px;
+    opacity: 0.9;
+  }
+  .hero-mark img { width: 100%; height: 100%; object-fit: contain; }
+  .hero-eyebrow {
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 24px;
+  }
+  .hero-title {
+    font-family: 'Fraunces', serif;
+    font-weight: 300;
+    font-size: clamp(44px, 6vw, 76px);
+    line-height: 1.02;
+    letter-spacing: -1px;
+    margin-bottom: 24px;
+  }
+  .hero-title em { font-style: italic; }
+  .hero-sub {
+    font-size: 15px;
+    line-height: 1.7;
+    color: var(--ink-soft);
+    max-width: 520px;
+    margin: 0 auto 40px;
+  }
+  .meta-row {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    margin-bottom: 48px;
+    flex-wrap: wrap;
+  }
+  .meta {
+    text-align: center;
+  }
+  .meta-label {
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+  .meta-val {
+    font-family: 'Fraunces', serif;
+    font-weight: 400;
+    font-size: 18px;
+    color: var(--ink);
+  }
+
+  /* Confirmation slide */
+  #slide-4 .panel { text-align: center; }
+  .check {
+    width: 56px;
+    height: 56px;
+    margin: 0 auto 28px;
+    border-radius: 50%;
+    border: 1px solid var(--ink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    font-family: 'Fraunces', serif;
+  }
+  .summary {
+    background: rgba(255,255,255,0.5);
+    border: 1px solid var(--line);
+    padding: 24px 28px;
+    margin: 32px auto;
+    max-width: 420px;
+    text-align: left;
+    border-radius: 2px;
+  }
+  .summary-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--line);
+    font-size: 14px;
+  }
+  .summary-row:last-child { border-bottom: none; }
+  .summary-row .label {
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    font-size: 11px;
+  }
+  .summary-row .val {
+    color: var(--ink);
+    font-family: 'Fraunces', serif;
+  }
+
+  /* Footer pagination */
+  .footer {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    padding: 24px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    z-index: 10;
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 0.5px;
+  }
+  .nav-arrows {
+    display: flex;
+    gap: 6px;
+  }
+  .nav-arrow {
+    width: 32px;
+    height: 32px;
+    border: 1px solid var(--line);
+    background: transparent;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    color: var(--ink);
+    transition: background 0.2s ease, border-color 0.2s ease;
+  }
+  .nav-arrow:hover {
+    background: var(--ink);
+    color: var(--bg);
+    border-color: var(--ink);
+  }
+  .nav-arrow:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+  .nav-arrow:disabled:hover {
+    background: transparent;
+    color: var(--ink);
+    border-color: var(--line);
+  }
+
+  @media (max-width: 640px) {
+    .topbar { padding: 20px 24px; }
+    .footer { padding: 16px 24px; }
+    .slide { padding: 0 24px; }
+    .input { font-size: 24px; }
+    .meta-row { gap: 24px; }
+    .progress-bar { width: 80px; }
+  }
+</style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <img src="logo.png" alt="Adherence" />
+      <span class="brand-text">Adherence Studio</span>
+    </div>
+    <div class="progress" id="progress">
+      <span><span id="step-num">01</span> / 04</span>
+      <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+    </div>
+  </header>
+
+  <div class="stage">
+    <div class="slides">
+
+      <!-- COVER -->
+      <section class="slide active" id="slide-0" data-step="cover">
+        <div class="panel">
+          <div class="hero-mark"><img src="logo.png" alt="Adherence" /></div>
+          <div class="hero-eyebrow">Soho House Bangkok &nbsp;×&nbsp; Adherence</div>
+          <h1 class="hero-title">A community <em>5K</em><br/>through Bangkok.</h1>
+          <p class="hero-sub">Movement, community and good energy. Led by Clinton Suh — Soho House New York member and founder of Adherence Studio. Pre-workout+ and Advanced Electrolytes+ provided, with a poolside social to follow.</p>
+
+          <div class="meta-row">
+            <div class="meta">
+              <div class="meta-label">Date</div>
+              <div class="meta-val">Sun, May 24</div>
+            </div>
+            <div class="meta">
+              <div class="meta-label">Check-in</div>
+              <div class="meta-val">8:30 AM</div>
+            </div>
+            <div class="meta">
+              <div class="meta-label">Venue</div>
+              <div class="meta-val">Soho House Bangkok</div>
+            </div>
+          </div>
+
+          <div class="actions" style="justify-content:center;">
+            <button class="btn" data-next>Reserve a spot <span class="arrow">→</span></button>
+          </div>
+        </div>
+      </section>
+
+      <!-- NAME -->
+      <section class="slide" id="slide-1" data-step="name">
+        <div class="panel">
+          <div class="eyebrow"><span class="num">01</span> <span class="arrow">→</span> <span>Your name</span></div>
+          <h1 class="headline">What should we <em>call</em> you?</h1>
+          <p class="sub">First and last — so we can have you on the list at the door.</p>
+          <div class="field">
+            <input type="text" class="input" id="name" placeholder="Type your name here..." autocomplete="name" />
+            <div class="error" id="name-error">Please enter your name to continue.</div>
+          </div>
+          <div class="actions">
+            <button class="btn" data-next>OK <span class="arrow">→</span></button>
+            <span class="hint">press <kbd>Enter</kbd></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- EMAIL -->
+      <section class="slide" id="slide-2" data-step="email">
+        <div class="panel">
+          <div class="eyebrow"><span class="num">02</span> <span class="arrow">→</span> <span>Email</span></div>
+          <h1 class="headline">Where can we <em>reach</em> you?</h1>
+          <p class="sub">We'll send confirmation, schedule details and a reminder the morning of.</p>
+          <div class="field">
+            <input type="email" class="input" id="email" placeholder="you@example.com" autocomplete="email" />
+            <div class="error" id="email-error">Please enter a valid email.</div>
+          </div>
+          <div class="actions">
+            <button class="btn" data-next>OK <span class="arrow">→</span></button>
+            <span class="hint">press <kbd>Enter</kbd></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- SOCIAL (optional) -->
+      <section class="slide" id="slide-3" data-step="social">
+        <div class="panel">
+          <div class="eyebrow"><span class="num">03</span> <span class="arrow">→</span> <span>Social <span style="text-transform:none; font-style:italic; color:var(--muted);">— optional</span></span></div>
+          <h1 class="headline">Where can we <em>find</em> you?</h1>
+          <p class="sub">Drop your Instagram (or any handle) so we can tag you in event photos. <span class="opt">Totally optional.</span></p>
+          <div class="field">
+            <input type="text" class="input" id="social" placeholder="@yourhandle" />
+          </div>
+          <div class="actions">
+            <button class="btn" data-submit>Complete RSVP <span class="arrow">→</span></button>
+            <button class="skip" data-submit>Skip & finish</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- CONFIRMATION -->
+      <section class="slide" id="slide-4" data-step="done">
+        <div class="panel">
+          <div class="check">✓</div>
+          <div class="hero-eyebrow">You're in</div>
+          <h1 class="hero-title" style="font-size:clamp(36px,5vw,56px);">See you Sunday<em>.</em></h1>
+          <p class="hero-sub">A confirmation is on its way. Save the date — check-in opens at 8:30 AM at Soho House Bangkok.</p>
+          <div class="summary" id="summary"></div>
+          <p style="font-size:12px; color:var(--muted); letter-spacing:0.5px;">Need to cancel? You have until Sat, May 23 at 8:00 AM.</p>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div>Powered by <span style="color:var(--ink); font-family:'Fraunces',serif;">Adherence</span></div>
+    <div class="nav-arrows">
+      <button class="nav-arrow" id="prev" aria-label="Previous">↑</button>
+      <button class="nav-arrow" id="next" aria-label="Next">↓</button>
+    </div>
+  </footer>
+
+<script>
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const totalSteps = 4; // cover excluded from progress numbering
+  let current = 0;
+  const data = { name: '', email: '', social: '' };
+
+  const stepNum = document.getElementById('step-num');
+  const fill = document.getElementById('progress-fill');
+  const progressWrap = document.getElementById('progress');
+  const prevBtn = document.getElementById('prev');
+  const nextBtn = document.getElementById('next');
+
+  function updateProgress() {
+    const stepIndex = current; // 0 = cover, 1..3 questions, 4 done
+    if (stepIndex === 0 || stepIndex === 4) {
+      progressWrap.style.opacity = 0;
+    } else {
+      progressWrap.style.opacity = 1;
+      stepNum.textContent = String(stepIndex).padStart(2, '0');
+      fill.style.width = ((stepIndex / 3) * 100) + '%';
+    }
+    prevBtn.disabled = current === 0 || current === 4;
+    nextBtn.disabled = current === slides.length - 1;
+  }
+
+  function go(to) {
+    if (to < 0 || to >= slides.length) return;
+    const cur = slides[current];
+    cur.classList.add('leaving');
+    cur.classList.remove('active');
+    setTimeout(() => cur.classList.remove('leaving'), 600);
+    current = to;
+    const nxt = slides[current];
+    nxt.classList.add('active');
+    updateProgress();
+    // autofocus
+    const input = nxt.querySelector('input');
+    if (input) setTimeout(() => input.focus(), 400);
+    if (current === 4) renderSummary();
+  }
+
+  function validate(stepEl) {
+    const step = stepEl.dataset.step;
+    if (step === 'name') {
+      const v = document.getElementById('name').value.trim();
+      const err = document.getElementById('name-error');
+      if (!v) { err.classList.add('show'); return false; }
+      err.classList.remove('show');
+      data.name = v;
+      return true;
+    }
+    if (step === 'email') {
+      const v = document.getElementById('email').value.trim();
+      const err = document.getElementById('email-error');
+      const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+      if (!ok) { err.classList.add('show'); return false; }
+      err.classList.remove('show');
+      data.email = v;
+      return true;
+    }
+    if (step === 'social') {
+      data.social = document.getElementById('social').value.trim();
+      return true;
+    }
+    return true;
+  }
+
+  function renderSummary() {
+    const s = document.getElementById('summary');
+    const rows = [
+      ['Name', data.name || '—'],
+      ['Email', data.email || '—'],
+    ];
+    if (data.social) rows.push(['Social', data.social.startsWith('@') ? data.social : '@' + data.social]);
+    rows.push(['Event', 'Soho House x Adherence 5K']);
+    s.innerHTML = rows.map(([l,v]) => `<div class="summary-row"><span class="label">${l}</span><span class="val">${v}</span></div>`).join('');
+  }
+
+  // Bind next buttons
+  document.querySelectorAll('[data-next]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (validate(slides[current])) go(current + 1);
+    });
+  });
+  document.querySelectorAll('[data-submit]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (validate(slides[current])) {
+        // hook for real backend / Typeform redirect goes here
+        // console.log('submission', data);
+        go(current + 1);
+      }
+    });
+  });
+
+  // Footer nav
+  prevBtn.addEventListener('click', () => go(current - 1));
+  nextBtn.addEventListener('click', () => {
+    if (validate(slides[current])) go(current + 1);
+  });
+
+  // Enter key advances
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      const slide = slides[current];
+      const submit = slide.querySelector('[data-submit]');
+      const next = slide.querySelector('[data-next]');
+      if (submit) submit.click();
+      else if (next) next.click();
+    }
+  });
+
+  updateProgress();
+</script>
+</body>
+</html>
